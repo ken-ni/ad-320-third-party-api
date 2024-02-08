@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Boilerplate HTML-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Quote Puller</title>
+</head>
+
+<body>
+    <!-- Format the webpage with headers and elements to be populated by script-->
+    <h1>Movie Quote Generator</h1>
+    <p>Using API: <a href="https://api.seriesquotes.10cyrilc.me/docs">Web Series Quotes API</a></p>
+    <br>
+    <div id="movieQuotesInfo"></div>
+    <button id="load-more">Load More Quotes</button>
+
+    <script>
+        // MovieQuotesEl is the element where we will store movie quotes
+        const movieQuotesEl = document.getElementById("movieQuotesInfo")
+        // This will allow us to click the button to generate more movie quotes
+        const loadMoreBtn = document.getElementById("load-more");
+
+        // Create an asynchronous function to pull from Movie Quote API
+        async function loadSomeMovieQuotes(numberOfQuotes = 1) {
+            // Endpoint for API
+            const URL = `https://api.seriesquotes.10cyrilc.me/quote/?count=${numberOfQuotes}`;
+            // We are pulling a json
+            let json;
+
+            // Error catching block
+            try {
+                const response = await fetch(URL);
+                json = await response.json();
+            } catch (error) {
+                console.log("There was an error: ", error)
+            }
+
+            // If we get a response, proceed
+            if (json) {
+                // Grab quote and author of the JSON we are receiving
+                for (let {quote, author} of json) {
+                    // Modify any author data that has these criteria, noticed that some are a little wonky so we needed this
+                    if (author == null || author.length == 0) {
+                        author = "N/A";
+                    }
+
+                    // Create Paragraph element to show author of movie quote
+                    const movieQuoteAuth = document.createElement('p');
+                    // Create Paragraph element to show actual movie quote
+                    const movieQuote = document.createElement('p');
+                    // Format string that shows author
+                    movieQuoteAuth.innerText = "Author: " + author;
+
+                    // Formatting the quote to only have double quotes when we insert them, and replace any already existing ones with single quotes
+                    if (quote.includes("\"")) {
+                        replaceQuotes = quote.replaceAll("\"", "\'");
+                        quote = replaceQuotes;
+                    }
+
+                    // Insert double quotes around our quote and format them to look nice
+                    movieQuote.innerText = "Quote: \n\"" + quote + "\"" + "\n\n\n";
+                    // Apped both quote and author to movieQuotesEl HTML element
+                    movieQuotesEl.append(movieQuoteAuth, movieQuote);
+                }
+            }
+        }
+
+        // Event listener for every time the button is clicked, we call our function to generate movie quotes
+        loadMoreBtn.addEventListener('click', () => {
+            loadSomeMovieQuotes(5);
+        })
+    </script>
+</body>
+
+</html>
